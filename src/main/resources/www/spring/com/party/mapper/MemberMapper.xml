@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+"-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="www.spring.com.party.mapper.MemberMapper">
+	<resultMap id="rm4MemberVO" type="www.spring.com.party.model.MemberVO">
+		<id property="id" column="id" />
+		<result property="password" column="password" />
+		<result property="height" column="height" />
+		<result property="grade" column="grade" />
+		<result property="address" column="address" />
+		<result property="nickname" column="nickname" />
+		<result property="position" column="position" />
+		<result property="gender" column="gender" />
+		<result property="regdate" column="regdate" />
+		<result property="updatedate" column="updatedate" />
+		<collection property="authList" resultMap="rm4AuthVO">
+		</collection>
+	</resultMap>
+	<resultMap type="www.spring.com.party.model.AuthVO" id="rm4AuthVO">
+		<id property="authority" column="authr" />
+	    <result property="id" column="u_id" />
+	</resultMap>
+	
+	<select id="read" resultMap="rm4MemberVO">
+		SELECT u.id id, password, height, address, position, grade, nickName, a.id u_id, a.authority authr 
+		from tbl_user u, tbl_auth a
+		WHERE u.id = #{u.id}
+	 	 and u.id = a.id (+)
+	</select>
+	<select id="getMember" resultMap="rm4MemberVO">
+		<![CDATA[
+			select * from tbl_user where id = #{id}
+		]]>
+	</select>
+	
+	<select id="getAllMember" resultMap="rm4MemberVO">
+		<![CDATA[
+			select * from tbl_user
+		]]>
+	</select>
+	
+	<select id="getMemberTwoLatest" resultMap="rm4MemberVO">
+		<![CDATA[
+			select * from tbl_user where rownum > (
+				select max(rownum)-2 from tbl_user
+			)
+		]]>
+	</select>
+
+ 	<!-- CRUD Pattern에 맞춰서 Insert/Select/Update/Delete순으로 배치 -->
+	<insert id="insertMember">
+  		INSERT INTO tbl_user(id, password, height, grade, address, nickname, position, gender)
+		VALUES(#{id,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{height}, 
+					#{grade}, #{address,jdbcType=VARCHAR}, #{nickname,jdbcType=VARCHAR}, 
+					#{position,jdbcType=VARCHAR}, #{gender,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateMember">
+		<selectKey keyProperty="updatedate" resultType="date" order="BEFORE">
+			SELECT sysdate FROM DUAL
+		</selectKey>
+		<![CDATA[
+			UPDATE tbl_user
+			      SET id = #{id}, 
+			   	    	password = #{password}, 
+			   	    	height = #{height}, 
+			   	    	grade = #{grade}, 
+			   	    	address = #{address}, 
+			   	    	nickname = #{nickname}, 
+			   	    	position = #{position}, 
+			   	    	gender = #{gender}, 
+			   	    	updatedate = #{updatedate}
+		   WHERE id = #{id}
+		]]>
+	</update>
+	
+	<delete id="deleteMember">
+		<![CDATA[
+			delete from tbl_user where id = #{id}
+		]]>
+	</delete>
+	
+	
+	<delete id="deleteMemberByColl">
+		<![CDATA[
+			delete from tbl_user where id in 
+		]]>
+		<foreach item="id" collection="list"
+			open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	
+	
+	
+	
+
+</mapper>
+
+
+
+
+
+
+
+
